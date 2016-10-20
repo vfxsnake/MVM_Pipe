@@ -147,9 +147,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         self.setFloating(True)
         self.show()
 
-
-
-
         '''Connect Buttons'''
 
         self.colorLightRl_pushButton.clicked.connect(self.setColorLightRls)
