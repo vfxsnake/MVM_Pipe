@@ -18,11 +18,30 @@ class ContoruCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
         '''Connections'''
         self.setSettings_pushButton.clicked.connect(self.setContourSettings)
 
+        self.show()
+
     def setContourSettings(self):
         contourWidth = self.contourWidth_spinBox.value()
         normalContrast = self.normalContrast_spinBox.value()
 
+        shadingGroups = pm.ls(type="shadingEngine")
+        for sg in shadingGroups:
+            try:
+                sg.miContourWidth.set(contourWidth)
+            except:
+                pass
 
+        miOptions = pm.ls(type="mentalrayOptions")
+
+        for options in miOptions:
+
+            if options.name() == "miDefaultOptions":
+                try:
+                    options.contourNormal.set(normalContrast)
+                except:
+                    pass
+
+        self.close()
 
 
 class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
@@ -145,6 +164,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         self.openStack_pushButton.clicked.connect(self.openStack)
 
         self.texture_pushButton.clicked.connect(self.getConTextura)
+        self.contourSettings_pushButton.clicked.connect(self.contourWindow)
 
     def setColorLightRls(self):
 
@@ -681,6 +701,10 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         for sg in conTexturaSG:
             pm.connectAttr(rampShader.outColor, sg.surfaceShader, f=True)
+
+    def contourWindow(self):
+
+        contoruUi = ContoruCtrls(self.mainWindow)
 
 
 
