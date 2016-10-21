@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Contour.ui'
 #
-# Created: Thu Oct 20 17:32:55 2016
+# Created: Fri Oct 21 10:54:39 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,7 +34,7 @@ class Ui_ContourCtrls(object):
         self.normalContrast_spinBox = QtGui.QDoubleSpinBox(self.contourCtrls_dockWidgetContents)
         self.normalContrast_spinBox.setMaximum(360.0)
         self.normalContrast_spinBox.setSingleStep(0.1)
-        self.normalContrast_spinBox.setProperty("value", 0.45)
+        self.normalContrast_spinBox.setProperty("value", 4.5)
         self.normalContrast_spinBox.setObjectName("normalContrast_spinBox")
         self.verticalLayout.addWidget(self.normalContrast_spinBox)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
