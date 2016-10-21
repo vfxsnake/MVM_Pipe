@@ -8,28 +8,29 @@ from RenderLayerDockW import Ui_renderLayerDockWidget
 from CastShadow import Ui_CastShadowsDockWidget
 from Contour import Ui_ContourCtrls
 
-class ContoruCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
+class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
     def __init__(self, parent=None):
-        super(ContoruCtrls, self).__init__(parent)
+        super(ContourCtrls, self).__init__(parent)
         self.setupUi(self)
         self.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
         self.setFloating(True)
 
+        self.isInline()
+        val = self.getContourSwitch()
+
+        self.contourWidth_spinBox.setValue(float(val))
+
         '''Connections'''
         self.setSettings_pushButton.clicked.connect(self.setContourSettings)
-
+        #self.enableNormaContrast_checkBox.stateChanged.connect(self.checkState)
         self.show()
 
     def setContourSettings(self):
-        contourWidth = self.contourWidth_spinBox.value()
-        normalContrast = self.normalContrast_spinBox.value()
 
-        shadingGroups = pm.ls(type="shadingEngine")
-        for sg in shadingGroups:
-            try:
-                sg.miContourWidth.set(contourWidth)
-            except:
-                pass
+        normalContrast = self.normalContrast_spinBox.value()
+        enableContrast = self.enableNormaContrast_checkBox.isChecked()
+
+        self.setContourSwitch()
 
         miOptions = pm.ls(type="mentalrayOptions")
 
@@ -38,10 +39,77 @@ class ContoruCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
             if options.name() == "miDefaultOptions":
                 try:
                     options.contourNormal.set(normalContrast)
+                    options.enableContourNormal.set(enableContrast)
                 except:
                     pass
 
         self.close()
+
+    def isInline(self):
+        rls = pm.ls(type='renderLayer')
+
+        if rls:
+            currentRl = rls[0].currentLayer()
+
+            if 'Inline' in currentRl.name():
+                self.enableNormaContrast_checkBox.setChecked(True)
+                self.normalContrast_spinBox.setDisabled(False)
+                self.normalContrast_label.setDisabled(False)
+
+            else:
+                self.enableNormaContrast_checkBox.setChecked(False)
+                self.normalContrast_spinBox.setDisabled(True)
+                self.normalContrast_label.setDisabled(True)
+
+    def checkState(self, state):
+
+        if state == QtCore.Qt.Checked:
+            self.normalContrast_spinBox.setDisabled(False)
+            self.normalContrast_label.setDisabled(False)
+
+        else:
+            self.normalContrast_spinBox.setDisabled(True)
+            self.normalContrast_label.setDisabled(True)
+
+
+    def getContourSwitch(self):
+
+        defaultRGs = pm.ls(type='renderGlobals')
+        if defaultRGs:
+            drg = defaultRGs[0]
+            contourSwitch = drg.preRenderLayerMel.get()
+            if contourSwitch:
+                splited = contourSwitch.split(' ')
+                print splited
+                value = splited[-1].split(';')
+                print value[0]
+                return value[0]
+
+            else:
+                messageBox = QtGui.QMessageBox()
+                messageBox.setText('No flag set')
+                messageBox.exec_()
+
+
+    def setContourSwitch(self):
+
+        defaultRGs = pm.ls(type='renderGlobals')
+        if defaultRGs:
+            drg = defaultRGs[0]
+            contourSwitch = drg.preRenderLayerMel.get()
+            if contourSwitch:
+                splited = contourSwitch.split(' ')
+                print splited
+                splited[-1] = '{0};'.format(self.contourWidth_spinBox.value())
+                melcmd = ' '.join(splited)
+                print melcmd
+                drg.preRenderLayerMel.set(melcmd)
+
+            else:
+                messageBox = QtGui.QMessageBox()
+                messageBox.setText('No flag set')
+                messageBox.exec_()
+
 
 
 class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
@@ -349,7 +417,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
     def setZDepth(self):
         pm.select(clear=True)
 
-
     def submit2Stack(self):
         print 'Submitting'
 
@@ -446,9 +513,16 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def TrailRlSetUp(self, renderLayer):
 
-
-
         ''' set RenderSetings'''
+        miGlobals = pm.ls(type='mentalrayGlobals')
+        if miGlobals:
+            for globals in miGlobals:
+                try:
+                    globals.exportCustomMotion.set(1)
+                    globals.exportMotionOffset.set(0)
+                except:
+                    pass
+
         renderSettings = pm.ls(type='mentalrayOptions')
 
         miDefault = None
@@ -505,6 +579,16 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def inlineDefault(self, renderLayer):
 
+        '''contourSwitch pluggint needed'''
+        defaultRGs = pm.ls(type='renderGlobals')
+        if defaultRGs:
+            for drg in defaultRGs:
+                try:
+                    renderLayer.addAdjustments(drg.preRenderLayerMel)
+                    drg.preRenderLayerMel.set('contourSwitch -st 4 -il 0.5;')
+                except:
+                    pass
+
         inLineLambert = pm.shadingNode('lambert', asShader=True, name='inlineSh')
 
         miOptions = pm.ls(type="mentalrayOptions")
@@ -515,7 +599,8 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 try:
                     renderLayer.addAdjustments([options.contourBackground, options.contourInstance,
                                                 options.enableContourColor, options.contourColor, options.miRenderUsing,
-                                                options.enableContourNormal, options.contourNormal])
+                                                options.enableContourNormal, options.contourNormal,
+                                                options.maxSamples])
 
                     options.contourBackground.set(0)
                     options.contourInstance.set(1)
@@ -524,6 +609,8 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                     options.miRenderUsing.set(2)
                     options.enableContourNormal.set(1)
                     options.contourNormal.set(4.5)
+                    options.maxSamples.set(3)
+
                 except:
                     pass
             else:
@@ -546,18 +633,27 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         '''shading Group Overrides'''
 
         shadingGroups = pm.ls(type="shadingEngine")
-
+        print shadingGroups
         for sg in shadingGroups:
+            print sg
             try:
-                renderLayer.addAdjustments([sg.miContourEnable, sg.miContourWidth, sg.miContourColor, sg.surfaceShader])
-                sg.miContourEnable.set(1)
-                sg.miContourWidth.set(0.5)
-                sg.miContourColor.set(0, 0, 0)
+
                 pm.connectAttr(inLineLambert.outColor, sg.surfaceShader, force=True)
+
             except:
                 pass
 
     def outlineDefault(self, renderLayer):
+
+        '''contourSwitch pluggint needed'''
+        defaultRGs = pm.ls(type='renderGlobals')
+        if defaultRGs:
+            for drg in defaultRGs:
+                try:
+                    renderLayer.addAdjustments(drg.preRenderLayerMel)
+                    drg.preRenderLayerMel.set('contourSwitch -st 3 -ol 0.8;')
+                except:
+                    pass
 
         outLineLambert = pm.shadingNode('lambert', asShader=True, name='outlineSh')
         miOptions = pm.ls(type="mentalrayOptions")
@@ -568,7 +664,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 try:
                     renderLayer.addAdjustments([options.contourBackground, options.contourInstance,
                                                 options.enableContourColor, options.contourColor, options.miRenderUsing,
-                                                options.enableContourNormal, options.contourNormal])
+                                                options.enableContourNormal, options.contourNormal,options.maxSamples])
 
                     options.contourBackground.set(1)
                     options.contourInstance.set(0)
@@ -577,6 +673,8 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                     options.miRenderUsing.set(2)
                     options.enableContourNormal.set(0)
                     options.contourNormal.set(0)
+                    options.maxSamples.set(3)
+                    print "maxSamples set to 3"
                 except:
                     pass
             else:
@@ -603,15 +701,22 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         for sg in shadingGroups:
             try:
-                renderLayer.addAdjustments([sg.miContourEnable, sg.miContourWidth, sg.miContourColor])
-                sg.miContourEnable.set(1)
-                sg.miContourWidth.set(0.85)
-                sg.miContourColor.set(0, 0, 0)
+
                 pm.connectAttr(outLineLambert.outColor, sg.surfaceShader, force=True)
             except:
                 pass
 
     def includeDefault(self, renderLayer):
+
+        '''contourSwitch pluggint needed'''
+        defaultRGs = pm.ls(type='renderGlobals')
+        if defaultRGs:
+            for drg in defaultRGs:
+                try:
+                    renderLayer.addAdjustments(drg.preRenderLayerMel)
+                    drg.preRenderLayerMel.set('contourSwitch -st 4 -il 0.5;')
+                except:
+                    pass
 
         miOptions = pm.ls(type="mentalrayOptions")
         ''' render Settings Options'''
@@ -649,18 +754,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         else:
             pass
 
-        '''shading Group Overrides'''
-
-        shadingGroups = pm.ls(type="shadingEngine")
-
-        for sg in shadingGroups:
-            try:
-                renderLayer.addAdjustments([sg.miContourEnable, sg.miContourWidth, sg.miContourColor])
-                sg.miContourEnable.set(1)
-                sg.miContourWidth.set(0.5)
-                sg.miContourColor.set(0, 0, 0)
-            except:
-                pass
 
     def mvmToonRamp(self):
         rampShader = pm.shadingNode('rampShader', asShader=True)
@@ -707,7 +800,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def contourWindow(self):
 
-        contoruUi = ContoruCtrls(self.mainWindow)
+        contoruUi = ContourCtrls(self.mainWindow)
 
 
 
