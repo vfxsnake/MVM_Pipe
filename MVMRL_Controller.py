@@ -505,6 +505,8 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def inlineDefault(self, renderLayer):
 
+        inLineLambert = pm.shadingNode('lambert', asShader=True, name='inlineSh')
+
         miOptions = pm.ls(type="mentalrayOptions")
         ''' render Settings Options'''
         for options in miOptions:
@@ -521,7 +523,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                     options.contourColor.set(0.5, 0.5, 0.5)
                     options.miRenderUsing.set(2)
                     options.enableContourNormal.set(1)
-                    options.contourNormal.set(0.45)
+                    options.contourNormal.set(4.5)
                 except:
                     pass
             else:
@@ -547,15 +549,17 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         for sg in shadingGroups:
             try:
-                renderLayer.addAdjustments([sg.miContourEnable, sg.miContourWidth, sg.miContourColor])
+                renderLayer.addAdjustments([sg.miContourEnable, sg.miContourWidth, sg.miContourColor, sg.surfaceShader])
                 sg.miContourEnable.set(1)
                 sg.miContourWidth.set(0.5)
                 sg.miContourColor.set(0, 0, 0)
+                pm.connectAttr(inLineLambert.outColor, sg.surfaceShader, force=True)
             except:
                 pass
 
     def outlineDefault(self, renderLayer):
 
+        outLineLambert = pm.shadingNode('lambert', asShader=True, name='outlineSh')
         miOptions = pm.ls(type="mentalrayOptions")
         ''' render Settings Options'''
         for options in miOptions:
@@ -587,6 +591,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 frameBuffer.contourClearImage.set(1)
                 frameBuffer.contourSamples.set(3)
                 frameBuffer.contourFilter.set(2)
+
             except:
                 pass
         else:
@@ -602,6 +607,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 sg.miContourEnable.set(1)
                 sg.miContourWidth.set(0.85)
                 sg.miContourColor.set(0, 0, 0)
+                pm.connectAttr(outLineLambert.outColor, sg.surfaceShader, force=True)
             except:
                 pass
 
@@ -617,7 +623,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                                                 options.enableContourColor, options.contourColor, options.miRenderUsing,
                                                 options.enableContourNormal, options.contourNormal])
 
-                    options.contourBackground.set(0)
+                    options.contourBackground.set(1)
                     options.contourInstance.set(1)
                     options.enableContourColor.set(0)
                     options.contourColor.set(0.5, 0.5, 0.5)
