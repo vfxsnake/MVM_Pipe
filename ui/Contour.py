@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Contour.ui'
 #
-# Created: Fri Oct 21 10:54:39 2016
+# Created: Fri Oct 21 13:28:24 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_ContourCtrls(object):
     def setupUi(self, ContourCtrls):
         ContourCtrls.setObjectName("ContourCtrls")
-        ContourCtrls.resize(247, 167)
+        ContourCtrls.resize(366, 291)
         self.contourCtrls_dockWidgetContents = QtGui.QWidget()
         self.contourCtrls_dockWidgetContents.setObjectName("contourCtrls_dockWidgetContents")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.contourCtrls_dockWidgetContents)
@@ -28,6 +28,11 @@ class Ui_ContourCtrls(object):
         self.contourWidth_spinBox.setProperty("value", 0.5)
         self.contourWidth_spinBox.setObjectName("contourWidth_spinBox")
         self.verticalLayout.addWidget(self.contourWidth_spinBox)
+        spacerItem = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        self.verticalLayout.addItem(spacerItem)
+        self.enableNormaContrast_checkBox = QtGui.QCheckBox(self.contourCtrls_dockWidgetContents)
+        self.enableNormaContrast_checkBox.setObjectName("enableNormaContrast_checkBox")
+        self.verticalLayout.addWidget(self.enableNormaContrast_checkBox)
         self.normalContrast_label = QtGui.QLabel(self.contourCtrls_dockWidgetContents)
         self.normalContrast_label.setObjectName("normalContrast_label")
         self.verticalLayout.addWidget(self.normalContrast_label)
@@ -37,8 +42,8 @@ class Ui_ContourCtrls(object):
         self.normalContrast_spinBox.setProperty("value", 4.5)
         self.normalContrast_spinBox.setObjectName("normalContrast_spinBox")
         self.verticalLayout.addWidget(self.normalContrast_spinBox)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
-        self.verticalLayout.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        self.verticalLayout.addItem(spacerItem1)
         self.setSettings_pushButton = QtGui.QPushButton(self.contourCtrls_dockWidgetContents)
         self.setSettings_pushButton.setMaximumSize(QtCore.QSize(16777215, 50))
         font = QtGui.QFont()
@@ -55,6 +60,7 @@ class Ui_ContourCtrls(object):
     def retranslateUi(self, ContourCtrls):
         ContourCtrls.setWindowTitle(QtGui.QApplication.translate("ContourCtrls", "Contour Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.contourWidth_label.setText(QtGui.QApplication.translate("ContourCtrls", "Contour Width", None, QtGui.QApplication.UnicodeUTF8))
+        self.enableNormaContrast_checkBox.setText(QtGui.QApplication.translate("ContourCtrls", "Enable Normal Contrast", None, QtGui.QApplication.UnicodeUTF8))
         self.normalContrast_label.setText(QtGui.QApplication.translate("ContourCtrls", "Normal Contrast", None, QtGui.QApplication.UnicodeUTF8))
         self.setSettings_pushButton.setText(QtGui.QApplication.translate("ContourCtrls", "set Contour Settings", None, QtGui.QApplication.UnicodeUTF8))
 
