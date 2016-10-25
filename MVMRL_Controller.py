@@ -1,6 +1,10 @@
 import sys
+import os
 from PySide import QtGui
 from PySide import QtCore
+from sgConnection import ShotgunUtils
+
+from RederStack import RenderStack
 
 import pymel.core as pm
 
@@ -71,7 +75,6 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
             self.normalContrast_spinBox.setDisabled(True)
             self.normalContrast_label.setDisabled(True)
 
-
     def getContourSwitch(self):
 
         defaultRGs = pm.ls(type='renderGlobals')
@@ -89,7 +92,6 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
                 messageBox = QtGui.QMessageBox()
                 messageBox.setText('No flag set')
                 messageBox.exec_()
-
 
     def setContourSwitch(self):
 
@@ -109,7 +111,6 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
                 messageBox = QtGui.QMessageBox()
                 messageBox.setText('No flag set')
                 messageBox.exec_()
-
 
 
 class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
@@ -202,7 +203,6 @@ class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
         pm.select(clear=True)
         self.close()
 
-
 class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def __init__(self, parent=None):
@@ -230,6 +230,12 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         self.texture_pushButton.clicked.connect(self.getConTextura)
         self.contourSettings_pushButton.clicked.connect(self.contourWindow)
+
+        ''' default rl Dictionary'''
+        self.rlDic = {'code': 'shotName','sceneName':'test/test/test.ma', 'renderLayer': 'RenderTest',
+                      'renderStatus': 'ready to start', 'renderPriority': '1', 'rlMachine': 'Render01',
+                      'rlProjectPath': 'test', 'startFrame': 1, 'endFrame': 48, 'rlForce': False,
+                      'rlEngine': 'mr', 'rlFlags': '-v 5'}
 
     def setColorLightRls(self):
 
@@ -418,10 +424,55 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         pm.select(clear=True)
 
     def submit2Stack(self):
-        print 'Submitting'
+
+        renderLayers = pm.ls(type='renderLayer')
+
+        if renderLayers:
+            sg = ShotgunUtils()
+            sceneName = pm.sceneName().splitext()
+            projectPath = os.path.split(os.path.split(sceneName[0])[0])[0]
+
+            shotName = os.path.split(sceneName[0])[1]
+            rendeGlobals = pm.ls(type='renderGlobals')[0]
+
+
+            for rl in renderLayers:
+                if 'defaultRenderLayer' in rl.name():
+                    pass
+
+                else:
+                    if rl.renderable.get() == 0:
+                        pass
+                    else:
+
+                        rlSceneName = '{0}_{1}{2}'.format(sceneName[0], rl.name(), sceneName[1])
+                        rl.setCurrent()
+
+                        pm.saveAs(rlSceneName)
+
+                        rlDict = self.rlDic
+                        rlDict['code'] = shotName
+                        rlDict['sceneName'] = rlSceneName
+                        rlDict['renderLayer'] = rl.name()
+                        rlDict['rlProjectPath'] = projectPath
+                        rlDict['startFrame'] = int(rendeGlobals.startFrame.get())
+                        rlDict['endFrame'] = int(rendeGlobals.endFrame.get())
+                        rlDict['rlFlags'] = '-v 5 -rl {0}'.format(rl.name())
+
+                        if 'Inline' in rl.name():
+                            rlDict['rlForce'] = True
+
+                        elif 'Outline' in rl.name():
+                            rlDict['rlForce'] = True
+                        else:
+                            rlDict['rlForce'] = False
+                        print rlDict
+                        sg.createRenderLayer(rlDict)
+
 
     def openStack(self):
-        print 'opening RenderStack'
+        renderStack = RenderStack(self.mainWindow)
+
 
     def openTextDialog(self, windowTitle, infoText):
         text, ok = QtGui.QInputDialog.getText(self, windowTitle, infoText)
@@ -753,7 +804,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 pass
         else:
             pass
-
 
     def mvmToonRamp(self):
         rampShader = pm.shadingNode('rampShader', asShader=True)
