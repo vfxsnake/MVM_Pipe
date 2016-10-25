@@ -1,3 +1,4 @@
+
 from shotgun_api3 import Shotgun
 
 class ShotgunUtils():
@@ -33,12 +34,13 @@ class ShotgunUtils():
         rlForce = sceneDic['rlForce']
         rlEngine = sceneDic['rlEngine']
         rlFlags = sceneDic['rlFlags']
+        code = sceneDic['code']
 
 
         data = {'project': sgProject, 'sg_scenename': sceneName, 'sg_renderlayer': renderLayer,
                 'sg_rlstatus': renderStatus, 'sg_rlpriority': rlPriority, 'sg_rlmachine': rlMachine,
                 'sg_rlprojectpath': rlProjectPath, 'sg_startframe': startFrame, 'sg_endframe': endFrame,
-                'sg_rlforce': rlForce, 'sg_rlrenderengine': rlEngine, 'sg_rlrenderflags': rlFlags}
+                'sg_rlforce': rlForce, 'sg_rlrenderengine': rlEngine, 'sg_rlrenderflags': rlFlags, 'code': code}
 
         self.sg.create('CustomEntity01', data)
 
@@ -47,37 +49,47 @@ class ShotgunUtils():
         filters = [['id', 'is', sgId]]
         fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
                 'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
-                  'sg_rlrenderflags']
+                  'sg_rlrenderflags', 'code']
 
         rl = self.sg.find_one('CustomEntity01', filters, fields)
         print rl
 
-    def getAllRenderLayer(self, renderMachine):
+    def getAllRenderLayer(self, renderMachine=None):
 
         filters = [['sg_rlmachine', 'is', renderMachine]]
-        #
-        # fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
-        #         'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
-        #           'sg_rlrenderflags']
 
-        fields = ['sg_rlpriority']
+        fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
+                'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
+                  'sg_rlrenderflags', 'code']
+
+
 
         order = [{'field_name': 'sg_rlpriority', 'direction':'desc'}, {'field_name':'id', 'direction':'asc'}]
 
+        if renderMachine:
+            rl = self.sg.find('CustomEntity01', filters, fields, order)
+            return rl
+
+        else:
+            rl = self.sg.find('CustomEntity01', [], fields, order)
+            return rl
+
+    def getAllRlReady(self, renderMachine):
+        filters = [['sg_rlmachine', 'is', renderMachine], ['sg_rlstatus', 'is', 'ready to start']]
+
+        fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
+                'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
+                  'sg_rlrenderflags', 'code']
+        order = [{'field_name': 'sg_rlpriority', 'direction': 'desc'}, {'field_name': 'id', 'direction': 'asc'}]
+
         rl = self.sg.find('CustomEntity01', filters, fields, order)
-        print rl
+        return rl
 
-    def updateSgRL(self, sgId, sgRenderStatus, sgRenderPriority):
+    def updateSgRL(self, sgId, sgRenderStatus, sgRenderPriority, sgRenderMachine, sgProjectPath, renderEngine,
+                   renderFlags, startFrame, endFrame, force):
 
-        data = {'renderStatus': sgRenderStatus, 'renderPriority': sgRenderPriority}
+        data = {'renderStatus': sgRenderStatus, 'renderPriority': sgRenderPriority, 'sg_rlmachine': sgRenderMachine,
+                'sg_rlprojectpath': sgProjectPath, 'sg_rlrenderengine': renderEngine, 'sg_rlrenderflags': renderFlags,
+                'sg_startframe': startFrame, 'sg_endframe': endFrame, 'sg_rlforce': force}
         self.sg.update('CustomEntity01', sgId, data)
 
-# testDic = {'sceneName':'test/test/test.ma', 'renderLayer': 'RenderTest', 'renderStatus': 'ready to start',
-#            'renderPriority': 'NORMAL', 'rlMachine': 'Render01', 'rlProjectPath': 'test',
-#            'startFrame': 1, 'endFrame': 48, 'rlForce': False, 'rlEngine': 'mr', 'rlFlags': '-v 5'}
-
-#sgUtils = ShotgunUtils()
-# for x in range(1,10):
-#     sgUtils.createRenderLayer(testDic)
-
-#sgUtils.getAllRenderLayer('Render01')
