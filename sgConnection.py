@@ -85,6 +85,20 @@ class ShotgunUtils():
         rl = self.sg.find('CustomEntity01', filters, fields, order)
         return rl
 
+    def getPublished(self):
+        filters = [['sg_rlstatus', 'is_not', 'ready to start'], ['sg_rlstatus', 'is_not', 'in progress'],
+                   ['sg_rlstatus', 'is_not', 'ERROR'], ['sg_rlstatus', 'is_not', 'Done']]
+
+        fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
+                'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
+                  'sg_rlrenderflags', 'code']
+        order = [{'field_name': 'sg_rlpriority', 'direction': 'desc'}, {'field_name': 'id', 'direction': 'asc'}]
+
+        rl = self.sg.find('CustomEntity01', filters, fields, order)
+        return rl
+
+
+
     def updateSgRL(self, dictionary):
 
         data = {'sg_rlstatus': dictionary['sg_rlstatus'], 'sg_rlpriority': dictionary['sg_rlpriority'],
