@@ -1,4 +1,6 @@
 import sys
+sys.path.append('D:\Data\plug-ins\MVM_Pipe\python-api')
+sys.path.append('D:\Data\plug-ins\MVM_Pipe\ui')
 from PySide import QtGui
 from RederStack import RenderStack
 

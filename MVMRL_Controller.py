@@ -2,15 +2,15 @@ import sys
 import os
 from PySide import QtGui
 from PySide import QtCore
-from sgConnection import ShotgunUtils
-
-from RederStack import RenderStack
 
 import pymel.core as pm
+import maya.mel as mel
 
 from RenderLayerDockW import Ui_renderLayerDockWidget
 from CastShadow import Ui_CastShadowsDockWidget
 from Contour import Ui_ContourCtrls
+from sgConnection import ShotgunUtils
+from RederStack import RenderStack
 
 class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
     def __init__(self, parent=None):
@@ -26,7 +26,7 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
 
         '''Connections'''
         self.setSettings_pushButton.clicked.connect(self.setContourSettings)
-        #self.enableNormaContrast_checkBox.stateChanged.connect(self.checkState)
+        self.enableNormaContrast_checkBox.stateChanged.connect(self.checkState)
         self.show()
 
     def setContourSettings(self):
@@ -75,6 +75,7 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
             self.normalContrast_spinBox.setDisabled(True)
             self.normalContrast_label.setDisabled(True)
 
+
     def getContourSwitch(self):
 
         defaultRGs = pm.ls(type='renderGlobals')
@@ -92,6 +93,7 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
                 messageBox = QtGui.QMessageBox()
                 messageBox.setText('No flag set')
                 messageBox.exec_()
+
 
     def setContourSwitch(self):
 
@@ -111,6 +113,7 @@ class ContourCtrls(QtGui.QDockWidget, Ui_ContourCtrls):
                 messageBox = QtGui.QMessageBox()
                 messageBox.setText('No flag set')
                 messageBox.exec_()
+
 
 
 class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
@@ -203,6 +206,7 @@ class CastShadow(QtGui.QDockWidget, Ui_CastShadowsDockWidget):
         pm.select(clear=True)
         self.close()
 
+
 class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
     def __init__(self, parent=None):
@@ -233,7 +237,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         ''' default rl Dictionary'''
         self.rlDic = {'code': 'shotName','sceneName':'test/test/test.ma', 'renderLayer': 'RenderTest',
-                      'renderStatus': 'ready to start', 'renderPriority': '1', 'rlMachine': 'Render01',
+                      'renderStatus': 'ready to start', 'renderPriority': '1', 'rlMachine': 'Render00',
                       'rlProjectPath': 'test', 'startFrame': 1, 'endFrame': 48, 'rlForce': False,
                       'rlEngine': 'mr', 'rlFlags': '-v 5'}
 
@@ -415,7 +419,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                 includePrefix = prefix + '_Include'
                 rlInclude = self.createRenderLayer(selection, includePrefix)
                 rlInclude.setCurrent()
-                self.inlineDefault(rlInclude)
+                self.includeDefault(rlInclude)
                 print 'Render Layer {0} created and Overrides Applied'.format(rlInclude.name())
 
         pm.select(clear=True)
@@ -426,6 +430,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
     def submit2Stack(self):
 
         renderLayers = pm.ls(type='renderLayer')
+        renderSettings = pm.ls(type='renderGlobals')[0]
 
         if renderLayers:
             sg = ShotgunUtils()
@@ -434,7 +439,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
             shotName = os.path.split(sceneName[0])[1]
             rendeGlobals = pm.ls(type='renderGlobals')[0]
-
 
             for rl in renderLayers:
                 if 'defaultRenderLayer' in rl.name():
@@ -460,19 +464,23 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                         rlDict['rlFlags'] = '-v 5 -rl {0}'.format(rl.name())
 
                         if 'Inline' in rl.name():
+                            print renderSettings.preRenderLayerMel.get()
+                            mel.eval(renderSettings.preRenderLayerMel.get())
+                            rl.removeAdjustments(renderSettings.preRenderLayerMel)
+
                             rlDict['rlForce'] = True
 
                         elif 'Outline' in rl.name():
+                            print renderSettings.preRenderLayerMel.get()
+                            mel.eval(renderSettings.preRenderLayerMel.get())
+                            rl.removeAdjustments(renderSettings.preRenderLayerMel)
                             rlDict['rlForce'] = True
                         else:
                             rlDict['rlForce'] = False
-                        print rlDict
                         sg.createRenderLayer(rlDict)
-
 
     def openStack(self):
         renderStack = RenderStack(self.mainWindow)
-
 
     def openTextDialog(self, windowTitle, infoText):
         text, ok = QtGui.QInputDialog.getText(self, windowTitle, infoText)
@@ -636,7 +644,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
             for drg in defaultRGs:
                 try:
                     renderLayer.addAdjustments(drg.preRenderLayerMel)
-                    drg.preRenderLayerMel.set('contourSwitch -st 4 -il 0.5;')
+                    drg.preRenderLayerMel.set('contourSwitch_v002 -st 4 -il 0.5;')
                 except:
                     pass
 
@@ -686,9 +694,8 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
         shadingGroups = pm.ls(type="shadingEngine")
         print shadingGroups
         for sg in shadingGroups:
-            print sg
             try:
-
+                renderLayer.addAdjustments(sg.surfaceShader)
                 pm.connectAttr(inLineLambert.outColor, sg.surfaceShader, force=True)
 
             except:
@@ -702,7 +709,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
             for drg in defaultRGs:
                 try:
                     renderLayer.addAdjustments(drg.preRenderLayerMel)
-                    drg.preRenderLayerMel.set('contourSwitch -st 3 -ol 0.8;')
+                    drg.preRenderLayerMel.set('contourSwitch_v002 -st 3 -ol 0.8;')
                 except:
                     pass
 
@@ -752,58 +759,13 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         for sg in shadingGroups:
             try:
-
+                renderLayer.addAdjustments(sg.surfaceShader)
                 pm.connectAttr(outLineLambert.outColor, sg.surfaceShader, force=True)
             except:
                 pass
 
     def includeDefault(self, renderLayer):
-
-        '''contourSwitch pluggint needed'''
-        defaultRGs = pm.ls(type='renderGlobals')
-        if defaultRGs:
-            for drg in defaultRGs:
-                try:
-                    renderLayer.addAdjustments(drg.preRenderLayerMel)
-                    drg.preRenderLayerMel.set('contourSwitch -st 4 -il 0.5;')
-                except:
-                    pass
-
-        miOptions = pm.ls(type="mentalrayOptions")
-        ''' render Settings Options'''
-        for options in miOptions:
-
-            if options.name() == "miDefaultOptions":
-                try:
-                    renderLayer.addAdjustments([options.contourBackground, options.contourInstance,
-                                                options.enableContourColor, options.contourColor, options.miRenderUsing,
-                                                options.enableContourNormal, options.contourNormal])
-
-                    options.contourBackground.set(1)
-                    options.contourInstance.set(1)
-                    options.enableContourColor.set(0)
-                    options.contourColor.set(0.5, 0.5, 0.5)
-                    options.miRenderUsing.set(2)
-                    options.enableContourNormal.set(1)
-                    options.contourNormal.set(0.45)
-                except:
-                    pass
-            else:
-                pass
-        '''Frame buffer Options'''
-        frameBuffer = pm.ls(type="mentalrayFramebuffer")[0]
-        if frameBuffer:
-            try:
-                renderLayer.addAdjustments([frameBuffer.contourEnable, frameBuffer.contourClearImage,
-                                            frameBuffer.contourSamples, frameBuffer.contourFilter])
-                frameBuffer.contourEnable.set(1)
-                frameBuffer.contourClearImage.set(0)
-                frameBuffer.contourSamples.set(3)
-                frameBuffer.contourFilter.set(2)
-            except:
-                pass
-        else:
-            pass
+        print 'includeCreated'
 
     def mvmToonRamp(self):
         rampShader = pm.shadingNode('rampShader', asShader=True)

@@ -56,7 +56,7 @@ class ShotgunUtils():
 
     def getAllRenderLayer(self, renderMachine=None):
 
-        filters = [['sg_rlmachine', 'is', renderMachine]]
+        filters = [['sg_rlstatus', 'is_not', 'Published'], ['sg_rlmachine', 'is', renderMachine]]
 
         fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
                 'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
@@ -71,7 +71,7 @@ class ShotgunUtils():
             return rl
 
         else:
-            rl = self.sg.find('CustomEntity01', [], fields, order)
+            rl = self.sg.find('CustomEntity01', [['sg_rlstatus', 'is_not', 'Published']], fields, order)
             return rl
 
     def getAllRlReady(self, renderMachine):
@@ -85,11 +85,43 @@ class ShotgunUtils():
         rl = self.sg.find('CustomEntity01', filters, fields, order)
         return rl
 
-    def updateSgRL(self, sgId, sgRenderStatus, sgRenderPriority, sgRenderMachine, sgProjectPath, renderEngine,
-                   renderFlags, startFrame, endFrame, force):
+    def updateSgRL(self, dictionary):
 
-        data = {'renderStatus': sgRenderStatus, 'renderPriority': sgRenderPriority, 'sg_rlmachine': sgRenderMachine,
-                'sg_rlprojectpath': sgProjectPath, 'sg_rlrenderengine': renderEngine, 'sg_rlrenderflags': renderFlags,
-                'sg_startframe': startFrame, 'sg_endframe': endFrame, 'sg_rlforce': force}
-        self.sg.update('CustomEntity01', sgId, data)
+        data = {'sg_rlstatus': dictionary['sg_rlstatus'], 'sg_rlpriority': dictionary['sg_rlpriority'],
+                'sg_rlmachine': dictionary['sg_rlmachine'], 'sg_rlprojectpath': dictionary['sg_rlprojectpath'],
+                'sg_rlrenderengine': dictionary['sg_rlrenderengine'], 'sg_rlrenderflags': dictionary['sg_rlrenderflags'],
+                'sg_startframe': dictionary['sg_startframe'], 'sg_endframe': dictionary['sg_endframe'],
+                'sg_rlforce': dictionary['sg_rlforce']}
+        self.sg.update('CustomEntity01', dictionary['id'], data)
 
+
+    def getNotes(self, rlDic):
+
+        filters = [['note_links', 'is', {'type': 'CustomEntity01', 'id': rlDic['id']}]]
+        fields = ['content', 'created_at', 'user', 'addressings_to']
+        order = [{'field_name': 'created_at', 'direction': 'asc'}]
+
+        notes = self.sg.find('Note', filters, fields, order)
+
+        if notes:
+            return notes
+
+        else:
+            return None
+
+    def create3DNotes(self, rlDic, content):
+
+
+        data = {'project': {'type': 'Project', 'id': 94},'content': content,
+                'note_links': [{'type': 'CustomEntity01', 'id': rlDic['id']}],
+                'user': {'type': 'HumanUser', 'id': 96}, 'subject' : rlDic['sg_renderlayer']}
+
+        self.sg.create('Note', data)
+
+    def createCompNote(self, rlDic, content):
+
+        data = {'project': {'type': 'Project', 'id': 94}, 'content': content,
+                'note_links': [{'type': 'CustomEntity01', 'id': rlDic['id']}],
+                'user': {'type': 'HumanUser', 'id': 97}, 'subject': rlDic['sg_renderlayer']}
+
+        self.sg.create('Note', data)
