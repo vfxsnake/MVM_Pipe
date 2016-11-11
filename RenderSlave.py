@@ -91,9 +91,6 @@ class RenderSlave(QtGui.QMainWindow, Ui_RenderStack_MainWindow_slave):
             renderEngine = scene['sg_rlrenderengine']
             process.append(renderEngine)
 
-            renderFlags = scene['sg_rlrenderflags']
-            self.splitRenderFlags(renderFlags, process)
-
             process.append('-s')
             startFrame = str(scene['sg_startframe'])
             process.append(startFrame)
@@ -101,6 +98,9 @@ class RenderSlave(QtGui.QMainWindow, Ui_RenderStack_MainWindow_slave):
             process.append('-e')
             endFrame = str(scene['sg_endframe'])
             process.append(endFrame)
+
+            renderFlags = scene['sg_rlrenderflags']
+            self.splitRenderFlags(renderFlags, process)
 
             sceneName = scene['sg_scenename']
 
@@ -113,8 +113,8 @@ class RenderSlave(QtGui.QMainWindow, Ui_RenderStack_MainWindow_slave):
             else:
 
                 for frame in range(scene['sg_startframe'], scene['sg_endframe'] + 1):
-                    process[10] = str(frame)
-                    process[12] = str(frame)
+                    process[6] = str(frame)
+                    process[8] = str(frame)
 
                     subprocess.call(process)
 

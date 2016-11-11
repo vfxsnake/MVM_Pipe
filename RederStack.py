@@ -35,6 +35,7 @@ class RenderSettings(QtGui.QDockWidget, Ui_renderSettings_dockWidget):
         self.setWindowTitle('Render Settings')
         self.setFeatures(QtGui.QDockWidget.DockWidgetFloatable | QtGui.QDockWidget.DockWidgetMovable)
         self.setAllowedAreas(QtCore.Qt.RightDockWidgetArea)
+        self.startFrameSpinBox.setMaximum(5000)
         self.endFrameSpinBox.setMaximum(5000)
         self.notes_textBrowser.setReadOnly(True)
         self.notes_textBrowser.setTextBackgroundColor('white')
@@ -97,7 +98,7 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             self.renderStack_tableWidget.setRowCount(0)
 
         self.renderStack_tableWidget.setRowCount(tableZise)
-
+        self.renderStack_tableWidget.setSortingEnabled(False)
         for x, rl in enumerate(self.RenderLayers):
 
             sceneName = QtGui.QTableWidgetItem(rl['code'])
@@ -113,6 +114,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             self.renderStack_tableWidget.setItem(x, 3, priority)
             self.renderStack_tableWidget.setItem(x, 4, renderMachine)
             self.renderStack_tableWidget.setItem(x, 6, sgId)
+
+        self.renderStack_tableWidget.setSortingEnabled(True)
 
     def mapPriority(self, priority):
 
@@ -253,6 +256,10 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
 
             r5Button = QtGui.QPushButton('Render04')
 
+            r6Button = QtGui.QPushButton('Render05')
+
+            r7Button = QtGui.QPushButton('Render06')
+
             cancelButton = QtGui.QPushButton('cancel')
 
             messageBox = QtGui.QMessageBox()
@@ -261,6 +268,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             messageBox.addButton(r3Button, QtGui.QMessageBox.AcceptRole)
             messageBox.addButton(r4Button, QtGui.QMessageBox.AcceptRole)
             messageBox.addButton(r5Button, QtGui.QMessageBox.AcceptRole)
+            messageBox.addButton(r6Button, QtGui.QMessageBox.AcceptRole)
+            messageBox.addButton(r7Button, QtGui.QMessageBox.AcceptRole)
             messageBox.addButton(cancelButton, QtGui.QMessageBox.AcceptRole)
 
             messageBox.setText('Update Priority:')
@@ -284,6 +293,12 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             elif clicked == 4:
                 status = 'Render04'
 
+            elif clicked == 5:
+                status = 'Render05'
+                
+            elif clicked == 6:
+                status = 'Render06'
+            
             else:
                 return None
 

@@ -49,7 +49,7 @@ class ShotgunUtils():
         filters = [['id', 'is', sgId]]
         fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
                 'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
-                  'sg_rlrenderflags', 'code']
+                  'sg_rlrenderflags', 'code', 'updated_at']
 
         rl = self.sg.find_one('CustomEntity01', filters, fields)
         print rl
@@ -60,7 +60,7 @@ class ShotgunUtils():
 
         fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
                 'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
-                  'sg_rlrenderflags', 'code']
+                  'sg_rlrenderflags', 'code', 'updated_at']
 
 
 
@@ -91,7 +91,7 @@ class ShotgunUtils():
 
         fields = ['project', 'sg_scenename', 'sg_renderlayer','sg_rlstatus', 'sg_rlpriority', 'sg_rlmachine',
                 'sg_rlprojectpath', 'sg_startframe', 'sg_endframe','sg_rlforce', 'sg_rlrenderengine',
-                  'sg_rlrenderflags', 'code']
+                  'sg_rlrenderflags', 'code', 'updated_at']
         order = [{'field_name': 'sg_rlpriority', 'direction': 'desc'}, {'field_name': 'id', 'direction': 'asc'}]
 
         rl = self.sg.find('CustomEntity01', filters, fields, order)

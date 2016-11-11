@@ -431,6 +431,10 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
 
         renderLayers = pm.ls(type='renderLayer')
         renderSettings = pm.ls(type='renderGlobals')[0]
+        renderBuffer = pm.ls(type='mentalrayFramebuffer')[0]
+
+        contours = self.rlClearContours(renderLayers, renderSettings)
+
 
         if renderLayers:
             sg = ShotgunUtils()
@@ -452,8 +456,6 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                         rlSceneName = '{0}_{1}{2}'.format(sceneName[0], rl.name(), sceneName[1])
                         rl.setCurrent()
 
-                        pm.saveAs(rlSceneName)
-
                         rlDict = self.rlDic
                         rlDict['code'] = shotName
                         rlDict['sceneName'] = rlSceneName
@@ -461,22 +463,36 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
                         rlDict['rlProjectPath'] = projectPath
                         rlDict['startFrame'] = int(rendeGlobals.startFrame.get())
                         rlDict['endFrame'] = int(rendeGlobals.endFrame.get())
-                        rlDict['rlFlags'] = '-v 5 -rl {0}'.format(rl.name())
+                        rlDict['rlFlags'] = '-v 5 -rl {0} -ts 128'.format(rl.name())
+
 
                         if 'Inline' in rl.name():
-                            print renderSettings.preRenderLayerMel.get()
-                            mel.eval(renderSettings.preRenderLayerMel.get())
-                            rl.removeAdjustments(renderSettings.preRenderLayerMel)
+                            if contours:
+                                for contour in contours:
+                                    if rl.name() == contour[0].name():
+                                        mel.eval(contour[1])
+
+                                    else:
+                                        print 'noting to do'
 
                             rlDict['rlForce'] = True
 
                         elif 'Outline' in rl.name():
-                            print renderSettings.preRenderLayerMel.get()
-                            mel.eval(renderSettings.preRenderLayerMel.get())
-                            rl.removeAdjustments(renderSettings.preRenderLayerMel)
+
+                            if contours:
+                                for contour in contours:
+                                    if rl.name() == contour[0].name():
+                                        mel.eval(contour[1])
+
+                                    else:
+                                        print 'noting to do'
+
                             rlDict['rlForce'] = True
+
                         else:
                             rlDict['rlForce'] = False
+                            renderBuffer.contourEnable.set(0)
+                        pm.saveAs(rlSceneName)
                         sg.createRenderLayer(rlDict)
 
     def openStack(self):
@@ -578,7 +594,7 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
             for globals in miGlobals:
                 try:
                     globals.exportCustomMotion.set(1)
-                    globals.exportMotionOffset.set(0)
+                    globals.exportMotionOffset.set(1)
                 except:
                     pass
 
@@ -813,6 +829,24 @@ class MVM_RLSetUp(QtGui.QDockWidget, Ui_renderLayerDockWidget):
     def contourWindow(self):
 
         contoruUi = ContourCtrls(self.mainWindow)
+
+    def rlClearContours(self, rlList, renderG):
+
+        contourCollection = []
+
+        for rl in rlList:
+
+            if ('Inline' in rl.name() or 'Outline' in rl.name()):
+                rl.setCurrent()
+                contourCollection.append([rl, renderG.preRenderLayerMel.get()])
+                rl.removeAdjustments(renderG.preRenderLayerMel)
+                renderG.preRenderLayerMel.set('')
+                print contourCollection
+
+            else:
+                renderG.preRenderLayerMel.set('')
+
+        return contourCollection
 
 
 

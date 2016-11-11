@@ -1,4 +1,4 @@
-
+import datetime as dt
 from PySide import QtGui
 from PySide import QtCore
 
@@ -72,6 +72,7 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
         self.renderSettings.renderEngineLineEdit.setDisabled(True)
         self.renderSettings.projectPathLineEdit.setDisabled(True)
 
+
     def getRenderLayers(self):
         sg = ShotgunUtils()
 
@@ -93,7 +94,7 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             self.renderStack_tableWidget.setRowCount(0)
 
         self.renderStack_tableWidget.setRowCount(tableZise)
-
+        self.renderStack_tableWidget.setSortingEnabled(False)
         for x, rl in enumerate(self.RenderLayers):
 
             sceneName = QtGui.QTableWidgetItem(rl['code'])
@@ -103,12 +104,27 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             renderMachine = QtGui.QTableWidgetItem(rl['sg_rlmachine'])
             sgId = QtGui.QTableWidgetItem(str(rl['id']))
 
+            updated = rl['updated_at'].isoformat()
+            dateSplit = updated.split('T')
+            updatedDate = dt.datetime.strptime(dateSplit[0], '%Y-%m-%d')
+            today = dt.datetime.today()
+            deltaTime = updatedDate - today
+
             self.renderStack_tableWidget.setItem(x, 0, sceneName)
             self.renderStack_tableWidget.setItem(x, 1, renderLayer)
             self.renderStack_tableWidget.setItem(x, 2, status)
             self.renderStack_tableWidget.setItem(x, 3, priority)
             self.renderStack_tableWidget.setItem(x, 4, renderMachine)
             self.renderStack_tableWidget.setItem(x, 6, sgId)
+
+            if deltaTime.days == 0:
+                sceneName.setBackground(QtGui.QColor(0, 255, 0))
+
+            elif deltaTime.days == -1:
+                sceneName.setBackground(QtGui.QColor(255,255,0))
+
+
+        self.renderStack_tableWidget.setSortingEnabled(True)
 
     def mapPriority(self, priority):
 
