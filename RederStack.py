@@ -106,7 +106,7 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             status = QtGui.QTableWidgetItem(rl['sg_rlstatus'])
             priority = QtGui.QTableWidgetItem(self.mapPriority(rl['sg_rlpriority']))
             renderMachine = QtGui.QTableWidgetItem(rl['sg_rlmachine'])
-            sgId = QtGui.QTableWidgetItem(str(rl['id']))
+            sgId = QtGui.QTableWidgetItem(str(x))
 
             self.renderStack_tableWidget.setItem(x, 0, sceneName)
             self.renderStack_tableWidget.setItem(x, 1, renderLayer)
@@ -182,7 +182,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             if status:
                 for cell in selection:
                     row = cell.row()
-                    sceneDict = self.RenderLayers[row]
+                    indexId = self.renderStack_tableWidget.item(row, 6).text()
+                    sceneDict = self.RenderLayers[int(indexId)]
                     sceneDict['sg_rlstatus'] = status
                     self.sg.updateSgRL(sceneDict)
 
@@ -233,7 +234,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             if status:
                 for cell in selection:
                     row = cell.row()
-                    sceneDict = self.RenderLayers[row]
+                    indexId = self.renderStack_tableWidget.item(row, 6).text()
+                    sceneDict = self.RenderLayers[int(indexId)]
                     sceneDict['sg_rlpriority'] = status
                     self.sg.updateSgRL(sceneDict)
             else:
@@ -305,7 +307,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
             if status:
                 for cell in selection:
                     row = cell.row()
-                    sceneDict = self.RenderLayers[row]
+                    indexId = self.renderStack_tableWidget.item(row, 6).text()
+                    sceneDict = self.RenderLayers[int(indexId)]
                     sceneDict['sg_rlmachine'] = status
                     self.sg.updateSgRL(sceneDict)
             else:
@@ -314,8 +317,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
         self.updateTable()
 
     def updateSettings(self, index):
-
-        sceneDic = self.RenderLayers[index]
+        indexId = self.renderStack_tableWidget.item(index, 6).text()
+        sceneDic = self.RenderLayers[int(indexId)]
 
         self.renderSettings.projectPathLineEdit.setText(sceneDic['sg_rlprojectpath'])
         self.renderSettings.renderEngineLineEdit.setText(sceneDic['sg_rlrenderengine'])
@@ -327,8 +330,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
 
     def setSettings(self):
         row = self.renderStack_tableWidget.currentRow()
-
-        sceneDict = self.RenderLayers[row]
+        indexId = self.renderStack_tableWidget.item(row, 6).text()
+        sceneDict = self.RenderLayers[int(indexId)]
 
         sceneDict['sg_rlprojectpath'] = self.renderSettings.projectPathLineEdit.text()
         sceneDict['sg_rlrenderengine'] = self.renderSettings.renderEngineLineEdit.text()
@@ -367,7 +370,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
         if selection:
             for cell in selection:
                 row = cell.row()
-                sceneDict = self.RenderLayers[row]
+                indexId = self.renderStack_tableWidget.item(row, 6).text()
+                sceneDict = self.RenderLayers[int(indexId)]
 
                 localPath = '{0}/{1}/{2}'.format(sceneDict['sg_rlprojectpath'], 'images', sceneDict['sg_renderlayer'])
 
@@ -425,8 +429,8 @@ class RenderStack(QtGui.QMainWindow, Ui_RenderStack_MainWindow):
     def replyNote(self):
 
         row = self.renderStack_tableWidget.currentRow()
-
-        sceneDict = self.RenderLayers[row]
+        indexId = self.renderStack_tableWidget.item(row, 6).text()
+        sceneDict = self.RenderLayers[int(indexId)]
 
         noteDialog = noteCreateDialog()
         if noteDialog.noteText:

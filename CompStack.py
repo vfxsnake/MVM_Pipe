@@ -102,7 +102,7 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             status = QtGui.QTableWidgetItem(rl['sg_rlstatus'])
             priority = QtGui.QTableWidgetItem(self.mapPriority(rl['sg_rlpriority']))
             renderMachine = QtGui.QTableWidgetItem(rl['sg_rlmachine'])
-            sgId = QtGui.QTableWidgetItem(str(rl['id']))
+            sgId = QtGui.QTableWidgetItem(str(x))
 
             updated = rl['updated_at'].isoformat()
             dateSplit = updated.split('T')
@@ -114,8 +114,7 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             self.renderStack_tableWidget.setItem(x, 1, renderLayer)
             self.renderStack_tableWidget.setItem(x, 2, status)
             self.renderStack_tableWidget.setItem(x, 3, priority)
-            self.renderStack_tableWidget.setItem(x, 4, renderMachine)
-            self.renderStack_tableWidget.setItem(x, 6, sgId)
+            self.renderStack_tableWidget.setItem(x, 4, sgId)
 
             if deltaTime.days == 0:
                 sceneName.setBackground(QtGui.QColor(0, 255, 0))
@@ -150,7 +149,8 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             if status:
                 for cell in selection:
                     row = cell.row()
-                    sceneDict = self.RenderLayers[row]
+                    indexId = self.renderStack_tableWidget.item(row, 4).text()
+                    sceneDict = self.RenderLayers[int(indexId)]
                     sceneDict['sg_rlstatus'] = status
                     self.sg.updateSgRL(sceneDict)
 
@@ -201,7 +201,8 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
             if status:
                 for cell in selection:
                     row = cell.row()
-                    sceneDict = self.RenderLayers[row]
+                    indexId = self.renderStack_tableWidget.item(row, 4).text()
+                    sceneDict = self.RenderLayers[int(indexId)]
                     sceneDict['sg_rlpriority'] = status
                     self.sg.updateSgRL(sceneDict)
             else:
@@ -211,7 +212,8 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
 
     def updateSettings(self, index):
 
-        sceneDic = self.RenderLayers[index]
+        indexId = self.renderStack_tableWidget.item(index, 4).text()
+        sceneDic = self.RenderLayers[int(indexId)]
 
         self.renderSettings.projectPathLineEdit.setText(sceneDic['sg_rlprojectpath'])
         self.renderSettings.renderEngineLineEdit.setText(sceneDic['sg_rlrenderengine'])
@@ -234,8 +236,8 @@ class CompStack(QtGui.QMainWindow, Ui_CompStack_MainWindow):
     def replyNote(self):
 
         row = self.renderStack_tableWidget.currentRow()
-
-        sceneDict = self.RenderLayers[row]
+        indexId = self.renderStack_tableWidget.item(row, 4).text()
+        sceneDict = self.RenderLayers[int(indexId)]
 
         noteDialog = noteCreateDialog()
         if noteDialog.noteText:
