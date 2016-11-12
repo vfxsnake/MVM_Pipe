@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'CompStack_mainWindow.ui'
 #
-# Created: Fri Oct 28 12:11:24 2016
+# Created: Fri Nov 11 19:11:19 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,7 +32,7 @@ class Ui_CompStack_MainWindow(object):
         sizePolicy.setHeightForWidth(self.renderStack_tableWidget.sizePolicy().hasHeightForWidth())
         self.renderStack_tableWidget.setSizePolicy(sizePolicy)
         self.renderStack_tableWidget.setObjectName("renderStack_tableWidget")
-        self.renderStack_tableWidget.setColumnCount(4)
+        self.renderStack_tableWidget.setColumnCount(5)
         self.renderStack_tableWidget.setRowCount(0)
         item = QtGui.QTableWidgetItem()
         self.renderStack_tableWidget.setHorizontalHeaderItem(0, item)
@@ -42,6 +42,8 @@ class Ui_CompStack_MainWindow(object):
         self.renderStack_tableWidget.setHorizontalHeaderItem(2, item)
         item = QtGui.QTableWidgetItem()
         self.renderStack_tableWidget.setHorizontalHeaderItem(3, item)
+        item = QtGui.QTableWidgetItem()
+        self.renderStack_tableWidget.setHorizontalHeaderItem(4, item)
         self.renderStack_tableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.renderStack_tableWidget.horizontalHeader().setDefaultSectionSize(150)
         self.renderStack_tableWidget.horizontalHeader().setStretchLastSection(False)
@@ -71,6 +73,7 @@ class Ui_CompStack_MainWindow(object):
         self.renderStack_tableWidget.horizontalHeaderItem(1).setText(QtGui.QApplication.translate("CompStack_MainWindow", "Render Layer", None, QtGui.QApplication.UnicodeUTF8))
         self.renderStack_tableWidget.horizontalHeaderItem(2).setText(QtGui.QApplication.translate("CompStack_MainWindow", "Status", None, QtGui.QApplication.UnicodeUTF8))
         self.renderStack_tableWidget.horizontalHeaderItem(3).setText(QtGui.QApplication.translate("CompStack_MainWindow", "Priority", None, QtGui.QApplication.UnicodeUTF8))
+        self.renderStack_tableWidget.horizontalHeaderItem(4).setText(QtGui.QApplication.translate("CompStack_MainWindow", "Id", None, QtGui.QApplication.UnicodeUTF8))
         self.error_pushButton.setText(QtGui.QApplication.translate("CompStack_MainWindow", "Report Error", None, QtGui.QApplication.UnicodeUTF8))
         self.priority_pushButton.setText(QtGui.QApplication.translate("CompStack_MainWindow", "Set Priority", None, QtGui.QApplication.UnicodeUTF8))
 
